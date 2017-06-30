@@ -11,8 +11,12 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.AbsListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * SlidingDrawer
@@ -78,7 +82,12 @@ public class SlidingDrawer extends LinearLayout {
     private void init() {
 
         setOrientation(LinearLayout.VERTICAL);
-        setOnClickListener(null);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     public void setPartlyPositionHeight(int height) {
@@ -159,6 +168,7 @@ public class SlidingDrawer extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if(getChildCount()>1) throw new IllegalArgumentException("SlidingDraw can have only one child");
         if (getMeasuredHeight() != 0) {
             if (mPartlyPositionHeight == 0)
                 mPartlyPositionHeight = getMeasuredHeight() / 3;
@@ -205,8 +215,6 @@ public class SlidingDrawer extends LinearLayout {
 
                         if (mCurrentPosiontHeight - alterY <= getMeasuredHeight()) {
                             mCurrentPosiontHeight -= alterY;
-                        } else {
-                            mCurrentPosiontHeight = getMeasuredHeight();
                         }
                     } else {
                         mCurrentDirection = DIRECTION_DOWN;
@@ -214,8 +222,6 @@ public class SlidingDrawer extends LinearLayout {
                         if (mCurrentPosiontHeight - mClosedPositionHeight - alterY >= 0
                                 && mCurrentDirection - alterY - mClosedPositionHeight <= getMeasuredHeight()) {
                             mCurrentPosiontHeight -= alterY;
-                        } else {
-                            mCurrentPosiontHeight = mClosedPositionHeight;
                         }
                     }
                     setTranslationY(getMeasuredHeight() - mCurrentPosiontHeight);
@@ -231,6 +237,7 @@ public class SlidingDrawer extends LinearLayout {
                     } else if (mAutoRewindHeight > 0 && mCurrentPosiontHeight < mAutoRewindHeight) {
 
                         if (mStatus == STATUS_CLOSED && isTouchListViewFirstChild(event.getX(), event.getY())
+                                && Math.abs(mDownY - event.getY()) == 0
                                 && isClickToUp) {
                             open();
                         } else {
@@ -249,6 +256,7 @@ public class SlidingDrawer extends LinearLayout {
                     }
                 } else {
                     if (mStatus == STATUS_CLOSED && isTouchListViewFirstChild(event.getX(), event.getY())
+                            && Math.abs(mDownY - event.getY()) == 0
                             && isClickToUp) {
                         open();
                     }else if (Math.abs(mDownY-event.getY())==0
@@ -353,7 +361,28 @@ public class SlidingDrawer extends LinearLayout {
         if (getChildCount() != 0 && getChildAt(0) instanceof ListView) {
             ListView listView = (ListView) getChildAt(0);
             if (listView.getChildCount() != 0)
-                listView.setSelection(0);
+                if(stopListViewScrolling(listView)){
+                    listView.setSelection(0);
+                    if (!isListViewFirstChildEntireVisible(listView))
+                        listView.smoothScrollToPositionFromTop(0, 0, 0);
+                }else{
+                    listView.smoothScrollToPositionFromTop(0,0,0);
+                }
+
+        }
+    }
+
+    private boolean stopListViewScrolling(ListView listView){
+        try {
+            Method mFlingEndMethod;
+            Field mFlingEndField = AbsListView.class.getDeclaredField("mFlingRunnable");
+            mFlingEndField.setAccessible(true);
+            mFlingEndMethod = mFlingEndField.getType().getDeclaredMethod("endFling");
+            mFlingEndMethod.setAccessible(true);
+            mFlingEndMethod.invoke(mFlingEndField.get(listView));
+            return true;
+        } catch (Exception e) {
+           return false;
         }
     }
 
