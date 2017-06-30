@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     switch (position){
                         case 0:
+                            jump(BasicDemo.class);
                             break;
                         case 1:
                             jump(ListViewDemo.class);

@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".BasicDemo"/>
         <activity android:name=".ListViewDemo"/>
     </application>
 
