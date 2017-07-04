@@ -46,6 +46,8 @@ public class SlidingDrawer extends LinearLayout {
     private int mCurrentPosiontHeight;
     private int mAutoRewindHeight;
     private boolean isClickToUp = true;
+    /**mark if openpartly should callback the OnScrollListener.onCurrentHeightChange */
+    private boolean isOpenPartlyCallbackChange;
 
     private ValueAnimator mAnimator;
     private SlidingAnimationUpdateListener mSlidingAnimationUpdateListener;
@@ -55,8 +57,10 @@ public class SlidingDrawer extends LinearLayout {
     private boolean lockTouch = false;
     private int mCurrentDirection;
     private boolean hasChild;
+    private boolean isCallingOpenPartly;
 
     private OnStatusChangeListener mOnStatusChangeListener;
+    private OnScrollListener mOnScrollListener;
 
     private float mDownY;
 
@@ -118,6 +122,10 @@ public class SlidingDrawer extends LinearLayout {
         mOnStatusChangeListener = onStatusChangeListener;
     }
 
+    public void setOnScrollListener(OnScrollListener onScrollListener){
+        mOnScrollListener = onScrollListener;
+    }
+
 
     public void open() {
 
@@ -141,6 +149,7 @@ public class SlidingDrawer extends LinearLayout {
             startAnimation(mCurrentPosiontHeight, mPartlyPositionHeight);
             mCurrentPosiontHeight = mPartlyPositionHeight;
             mStatus = STATUS_OPEN_PARTLT;
+            isCallingOpenPartly = true;
         }
     }
 
@@ -154,8 +163,20 @@ public class SlidingDrawer extends LinearLayout {
         }
     }
 
-    public void setClickFirstChildToUp(boolean toUp) {
-        isClickToUp = toUp;
+    /**
+     * set if click first child to open
+     * @param toOpen
+     */
+    public void setClickFirstChildToOpen(boolean toOpen) {
+        isClickToUp = toOpen;
+    }
+
+    /**
+     * set if openpartly should callback the OnScrollListener.onCurrentHeightChange
+     * @param callChange
+     */
+    public void setOpenPartltCallbackChange(boolean callChange){
+        isOpenPartlyCallbackChange = callChange;
     }
 
 
@@ -187,7 +208,6 @@ public class SlidingDrawer extends LinearLayout {
             setTranslationY(getMeasuredHeight() - mClosedPositionHeight);
             if (getChildCount() != 0) hasChild = true;
         }
-
 
     }
 
@@ -251,6 +271,12 @@ public class SlidingDrawer extends LinearLayout {
 
                 mVelocityTracker.computeCurrentVelocity(1, TOUCH_TRACKER_PIXEL_MAX);
                 mVelocity = mVelocityTracker.getYVelocity();
+
+                if (mOnScrollListener != null
+                        && !(mStatus == STATUS_OPEN_PARTLT && mCurrentDirection == DIRECTION_DOWN)) {
+                    float alphaPercent = (float) (mCurrentPosiontHeight) / (float) getMeasuredHeight();
+                    mOnScrollListener.onCurrentHeightChange(alphaPercent);
+                }
 
                 break;
             case MotionEvent.ACTION_UP:
@@ -445,6 +471,16 @@ public class SlidingDrawer extends LinearLayout {
         @Override
         public void onAnimationUpdate(ValueAnimator valueAnimator) {
             setTranslationY(getMeasuredHeight() - (Float.valueOf((int) valueAnimator.getAnimatedValue())));
+            if (mOnScrollListener != null) {
+                if (isCallingOpenPartly && !isOpenPartlyCallbackChange) {
+                    return;
+                } else if (mStatus == STATUS_OPEN_PARTLT && mCurrentDirection == DIRECTION_DOWN) {
+                    return;
+                }
+
+                float alphaPercent = (float) (getMeasuredHeight() - getTranslationY()) / getMeasuredHeight();
+                mOnScrollListener.onCurrentHeightChange(alphaPercent);
+            }
         }
     }
 
@@ -471,6 +507,7 @@ public class SlidingDrawer extends LinearLayout {
                         break;
                 }
             }
+            isCallingOpenPartly = false;
         }
 
         @Override
@@ -491,5 +528,9 @@ public class SlidingDrawer extends LinearLayout {
         void onClosed();
 
         void onOpenPartly();
+    }
+
+    public interface OnScrollListener{
+        void onCurrentHeightChange(float percent);
     }
 }

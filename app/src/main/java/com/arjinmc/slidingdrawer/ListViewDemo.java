@@ -35,6 +35,7 @@ public class ListViewDemo extends AppCompatActivity {
         mSlidingDrawer.setClosedPostionHeight(120);
         mSlidingDrawer.setPartlyPositionHeight(400);
         mSlidingDrawer.setAutoRewindHeight(280);
+//        mSlidingDrawer.setOpenPartltCallbackChange(true);
         mSlidingDrawer.setOnStatusChangeListener(new SlidingDrawer.OnStatusChangeListener() {
             @Override
             public void onOpen() {
@@ -52,6 +53,13 @@ public class ListViewDemo extends AppCompatActivity {
 
             }
 
+        });
+
+        mSlidingDrawer.setOnScrollListener(new SlidingDrawer.OnScrollListener() {
+            @Override
+            public void onCurrentHeightChange(float percent) {
+                Log.e("scolling percent",percent+"");
+            }
         });
 
 
