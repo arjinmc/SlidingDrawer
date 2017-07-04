@@ -42,7 +42,11 @@ init layout position
 ```java
 initLayoutPosition();
 ```
-set if openpartly should callback the OnScrollListener.onCurrentHeightChange
+set if need to click the top of SlidingDrawer to open it,defualt is true.
+```java
+setClickFirstChildToOpen(boolean toOpen)
+```
+set if openpartly should callback the OnScrollListener.onCurrentHeightChange,default is false.
 ```java
 setOpenPartltCallbackChange(boolean callChange)
 ```
