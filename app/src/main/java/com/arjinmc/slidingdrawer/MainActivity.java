@@ -53,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
                         case 1:
                             jump(ListViewDemo.class);
                             break;
+                        case 2:
+                            jump(ScrollViewDemo.class);
+                            break;
                     }
                 }
             });

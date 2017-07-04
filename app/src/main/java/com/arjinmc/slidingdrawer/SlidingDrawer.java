@@ -10,10 +10,12 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -88,6 +90,15 @@ public class SlidingDrawer extends LinearLayout {
 
             }
         });
+    }
+
+    /**
+     * reiniti the original position
+     * call it if it's nessessery
+     * especially this layout is on the mapview(call onmeasure frequently) layer
+     */
+    public void initLayoutPosition() {
+        setTranslationY(getMeasuredHeight() - mClosedPositionHeight);
     }
 
     public void setPartlyPositionHeight(int height) {
@@ -168,7 +179,8 @@ public class SlidingDrawer extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if(getChildCount()>1) throw new IllegalArgumentException("SlidingDraw can have only one child");
+        if (getChildCount() > 1)
+            throw new IllegalArgumentException("SlidingDraw can have only one child");
         if (getMeasuredHeight() != 0) {
             if (mPartlyPositionHeight == 0)
                 mPartlyPositionHeight = getMeasuredHeight() / 3;
@@ -208,6 +220,16 @@ public class SlidingDrawer extends LinearLayout {
                                 return true;
                             }
                         }
+                        if (getChildAt(0) instanceof ScrollView) {
+                            ScrollView scrollView = (ScrollView) getChildAt(0);
+                            float alterEvenY = event.getY() <= 0 ? event.getY() + getTranslationY() : event.getY();
+                            if (alterEvenY < scrollView.getTop()
+                                    || alterEvenY > scrollView.getBottom()
+                                    || event.getX() < scrollView.getLeft()
+                                    || event.getX() > scrollView.getRight()
+                                    || !isScrollViewScrollTop())
+                                return true;
+                        }
                     }
 
                     if (alterY <= 0) {
@@ -226,8 +248,10 @@ public class SlidingDrawer extends LinearLayout {
                     }
                     setTranslationY(getMeasuredHeight() - mCurrentPosiontHeight);
                 }
+
                 mVelocityTracker.computeCurrentVelocity(1, TOUCH_TRACKER_PIXEL_MAX);
                 mVelocity = mVelocityTracker.getYVelocity();
+
                 break;
             case MotionEvent.ACTION_UP:
 
@@ -236,7 +260,7 @@ public class SlidingDrawer extends LinearLayout {
                         open();
                     } else if (mAutoRewindHeight > 0 && mCurrentPosiontHeight < mAutoRewindHeight) {
 
-                        if (mStatus == STATUS_CLOSED && isTouchListViewFirstChild(event.getX(), event.getY())
+                        if (mStatus == STATUS_CLOSED && isTouchFirstChild(event.getX(), event.getY())
                                 && Math.abs(mDownY - event.getY()) == 0
                                 && isClickToUp) {
                             open();
@@ -245,9 +269,9 @@ public class SlidingDrawer extends LinearLayout {
                             close();
                         }
 
-                    } else if (Math.abs(mDownY-event.getY())<=TOUCH_EFFECTIVE_DISTANCE
+                    } else if (Math.abs(mDownY - event.getY()) <= TOUCH_EFFECTIVE_DISTANCE
                             && mStatus == STATUS_OPEN_PARTLT
-                            && isTouchListViewFirstChild(event.getX(), event.getY())) {
+                            && isTouchFirstChild(event.getX(), event.getY())) {
                         clickListViewFirstChild();
                         close();
                     } else {
@@ -255,13 +279,13 @@ public class SlidingDrawer extends LinearLayout {
                         open();
                     }
                 } else {
-                    if (mStatus == STATUS_CLOSED && isTouchListViewFirstChild(event.getX(), event.getY())
+                    if (mStatus == STATUS_CLOSED && isTouchFirstChild(event.getX(), event.getY())
                             && Math.abs(mDownY - event.getY()) == 0
                             && isClickToUp) {
                         open();
-                    }else if (Math.abs(mDownY-event.getY())==0
+                    } else if (Math.abs(mDownY - event.getY()) == 0
                             && mStatus == STATUS_OPEN_PARTLT
-                            && isTouchListViewFirstChild(event.getX(), event.getY())) {
+                            && isTouchFirstChild(event.getX(), event.getY())) {
                         clickListViewFirstChild();
                         close();
                     } else {
@@ -299,6 +323,14 @@ public class SlidingDrawer extends LinearLayout {
                 return super.onInterceptTouchEvent(ev);
             }
 
+        } else if (mStatus == STATUS_OPEN_PARTLT
+                && getChildCount() != 0 && getChildAt(0) instanceof ScrollView) {
+            if (isScrollViewScrollTop()) {
+                return true;
+            } else {
+                return super.onInterceptTouchEvent(ev);
+            }
+
         } else if (mStatus == STATUS_OPEN
                 && getChildCount() != 0 && getChildAt(0) instanceof ListView) {
             ListView listView = (ListView) getChildAt(0);
@@ -310,7 +342,17 @@ public class SlidingDrawer extends LinearLayout {
                 return super.onInterceptTouchEvent(ev);
             }
 
-        } else {
+        } else if (mStatus == STATUS_OPEN
+                && getChildCount() != 0 && getChildAt(0) instanceof ScrollView) {
+            if (mCurrentDirection == DIRECTION_UP && isScrollViewScrollTop()) {
+                return super.onInterceptTouchEvent(ev);
+            } else if (mCurrentDirection == DIRECTION_DOWN && isScrollViewScrollTop()) {
+                return true;
+            } else {
+                return super.onInterceptTouchEvent(ev);
+            }
+
+        }else {
             return super.onInterceptTouchEvent(ev);
         }
 
@@ -329,17 +371,17 @@ public class SlidingDrawer extends LinearLayout {
         return false;
     }
 
-    private boolean isTouchListViewFirstChild(float x, float y) {
+    private boolean isTouchFirstChild(float x, float y) {
 
         if (getChildCount() == 0)
             return false;
-        if (!(getChildAt(0) instanceof ListView))
+        if (!(getChildAt(0) instanceof ViewGroup))
             return false;
-        ListView listView = (ListView) getChildAt(0);
-        if (listView == null)
+        ViewGroup viewGroup = (ViewGroup) getChildAt(0);
+        if (viewGroup == null)
             return false;
-        if (listView.getChildCount() != 0) {
-            View firstChild = listView.getChildAt(0);
+        if (viewGroup.getChildCount() != 0) {
+            View firstChild = viewGroup.getChildAt(0);
             if (x >= firstChild.getLeft() && x <= firstChild.getRight()
                     && y >= firstChild.getTop() && y <= firstChild.getBottom()) {
                 return true;
@@ -361,18 +403,18 @@ public class SlidingDrawer extends LinearLayout {
         if (getChildCount() != 0 && getChildAt(0) instanceof ListView) {
             ListView listView = (ListView) getChildAt(0);
             if (listView.getChildCount() != 0)
-                if(stopListViewScrolling(listView)){
+                if (stopListViewScrolling(listView)) {
                     listView.setSelection(0);
                     if (!isListViewFirstChildEntireVisible(listView))
                         listView.smoothScrollToPositionFromTop(0, 0, 0);
-                }else{
-                    listView.smoothScrollToPositionFromTop(0,0,0);
+                } else {
+                    listView.smoothScrollToPositionFromTop(0, 0, 0);
                 }
 
         }
     }
 
-    private boolean stopListViewScrolling(ListView listView){
+    private boolean stopListViewScrolling(ListView listView) {
         try {
             Method mFlingEndMethod;
             Field mFlingEndField = AbsListView.class.getDeclaredField("mFlingRunnable");
@@ -382,8 +424,19 @@ public class SlidingDrawer extends LinearLayout {
             mFlingEndMethod.invoke(mFlingEndField.get(listView));
             return true;
         } catch (Exception e) {
-           return false;
+            return false;
         }
+    }
+
+    private boolean isScrollViewScrollTop() {
+        if (getChildCount() == 0)
+            return false;
+        if (!(getChildAt(0) instanceof ScrollView))
+            return false;
+        ScrollView scrollView = (ScrollView) getChildAt(0);
+        if (scrollView.getScrollY() == 0)
+            return true;
+        return false;
     }
 
 

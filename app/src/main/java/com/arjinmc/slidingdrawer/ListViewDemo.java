@@ -35,6 +35,24 @@ public class ListViewDemo extends AppCompatActivity {
         mSlidingDrawer.setClosedPostionHeight(120);
         mSlidingDrawer.setPartlyPositionHeight(400);
         mSlidingDrawer.setAutoRewindHeight(280);
+        mSlidingDrawer.setOnStatusChangeListener(new SlidingDrawer.OnStatusChangeListener() {
+            @Override
+            public void onOpen() {
+                //already open
+            }
+
+            @Override
+            public void onClosed() {
+                //already closed
+            }
+
+            @Override
+            public void onOpenPartly() {
+                //already openpartly
+
+            }
+
+        });
 
 
         mBtnOpenPartly = (Button) findViewById(R.id.btn_open_partly);
