@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
         mItems = getResources().getStringArray(R.array.items);
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mMyAdapter = new MyAdapter();
         mRecyclerView.setAdapter(mMyAdapter);
 
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             holder.tvTitle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    switch (position){
+                    switch (position) {
                         case 0:
                             jump(BasicDemo.class);
                             break;
@@ -55,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case 2:
                             jump(ScrollViewDemo.class);
+                            break;
+                        case 3:
+                            jump(RecyclerViewDemo.class);
                             break;
                     }
                 }
@@ -80,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void jump(Class clz){
-        startActivity(new Intent(MainActivity.this,clz));
+    private void jump(Class clz) {
+        startActivity(new Intent(MainActivity.this, clz));
     }
 
 

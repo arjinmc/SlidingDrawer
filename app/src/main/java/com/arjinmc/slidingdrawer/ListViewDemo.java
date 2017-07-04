@@ -30,6 +30,7 @@ public class ListViewDemo extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listview);
+        getSupportActionBar().setSubtitle("listview");
 
         mSlidingDrawer = (SlidingDrawer) findViewById(R.id.slidingdrawer);
         mSlidingDrawer.setClosedPostionHeight(120);
@@ -58,7 +59,7 @@ public class ListViewDemo extends AppCompatActivity {
         mSlidingDrawer.setOnScrollListener(new SlidingDrawer.OnScrollListener() {
             @Override
             public void onCurrentHeightChange(float percent) {
-                Log.e("scolling percent",percent+"");
+                Log.e("scolling percent", percent + "");
             }
         });
 
@@ -83,7 +84,7 @@ public class ListViewDemo extends AppCompatActivity {
         mBtnTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("button","click backend");
+                Log.e("button", "click backend");
             }
         });
 
@@ -95,7 +96,7 @@ public class ListViewDemo extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
 //                Toast.makeText(MainActivity.this,"item click:"+position,Toast.LENGTH_SHORT).show();
-                Log.e("tag","item click:"+position);
+                Log.e("tag", "item click:" + position);
 
             }
         });
@@ -121,9 +122,9 @@ public class ListViewDemo extends AppCompatActivity {
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-            if(view==null)
-                view = LayoutInflater.from(ListViewDemo.this).inflate(R.layout.item_listview,null);
-            ((TextView) view.findViewById(R.id.tv_listview)).setText("item"+i);
+            if (view == null)
+                view = LayoutInflater.from(ListViewDemo.this).inflate(R.layout.item_listview, null);
+            ((TextView) view.findViewById(R.id.tv_listview)).setText("item" + i);
             return view;
         }
     }

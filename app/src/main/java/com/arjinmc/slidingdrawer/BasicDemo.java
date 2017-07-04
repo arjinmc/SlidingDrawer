@@ -22,6 +22,7 @@ public class BasicDemo extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_basic);
+        getSupportActionBar().setSubtitle("basic");
 
         mSlidingDrawer = (SlidingDrawer) findViewById(R.id.slidingdrawer);
         mSlidingDrawer.setClosedPostionHeight(120);
