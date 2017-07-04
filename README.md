@@ -4,7 +4,7 @@ An Android SlidingDrawer. Sliding up to open,sliding down to close,also has auto
 This SlidingDrawer can have only one child like ScrollView,if you have many children that you should add them as ScrollView way.
 
 ## sample image
-![img](images/sample.gif)
+![img](https://github.com/arjinmc/SlidingDrawer/blob/master/images/sample.gif) 
 
 ### layout.xml
 ```xml
