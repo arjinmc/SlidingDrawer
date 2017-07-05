@@ -38,7 +38,8 @@ set auto rewind height that when touch move below this height,it will be rewinde
 ```java
 setAutoRewindHeight(int height);
 ```
-init layout position
+init layout position  
+You don't need to call this method onece before show up,unless the height of parent view changes frequently.
 ```java
 initLayoutPosition();
 ```
