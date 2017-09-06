@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 
 /**
  * SlidingDrawer
- * Created by Eminem Lu on 16/6/17.
+ * Created by Eminem Lo on 16/6/17.
  * Email arjinmc@hotmail.com
  */
 
@@ -219,6 +219,7 @@ public class SlidingDrawer extends LinearLayout {
             setTranslationY(getMeasuredHeight() - mClosedPositionHeight);
             if (getChildCount() != 0) hasChild = true;
         }
+        setMeasuredDimension(widthMeasureSpec,heightMeasureSpec);
 
     }
 

@@ -8,7 +8,7 @@ import android.widget.Button;
 
 /**
  * basic layout
- * Created by Eminem Lu on 30/6/17.
+ * Created by Eminem Lo on 30/6/17.
  * Email arjinmc@hotmail.com
  */
 

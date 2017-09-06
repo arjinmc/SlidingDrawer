@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 /**
- * Created by Eminem Lu on 30/6/17.
+ * Created by Eminem Lo on 30/6/17.
  * Email arjinmc@hotmail.com
  */
 
